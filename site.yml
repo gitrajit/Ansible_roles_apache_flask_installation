@@ -1,0 +1,8 @@
+---
+ - hosts: web
+   become: True
+   vars_files:
+     - vars.yml
+   roles:
+     - role: apache2
+   

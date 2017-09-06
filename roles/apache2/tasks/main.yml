@@ -1,0 +1,28 @@
+- name: update cache
+  apt: update_cache=yes
+  changed_when: false
+- name: install packages
+  package: name={{ item  }} state=present update_cache=no
+  with_items:
+    - apache2
+    - libapache2-mod-wsgi
+    - python-pip
+  notify: restart apache2
+#- name: install python packages
+- pip: name={{ item }}
+  with_items:
+      - flask
+
+- name: "creating wsgi.conf file"
+  template: src=FlaskApp.conf.j2 dest="/etc/apache2/sites-available/FlaskApp.conf" owner=root group=root mode=0740
+  
+- name: change port to {{ SERVER_PORT }}
+  lineinfile:
+    path: "/etc/apache2/ports.conf"
+    regexp: "^Listen"
+    line: "Listen {{ SERVER_PORT }}"
+  notify: restart apache2
+
+- name: "Creating flaskapp.wsgi file"
+  template: src=flaskapp.wsgi.j2 dest="{{ path_flask }}/flaskapp.wsgi"
+  notify: restart apache2
